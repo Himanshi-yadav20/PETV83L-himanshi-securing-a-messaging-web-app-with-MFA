@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureChat | End-to-End Encrypted Messaging</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #1a73e8;
+            --primary-dark: #0d47a1;
+            --secondary: #f5f5f5;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --dark: #202124;
+            --light: #ffffff;
+            --gray: #dadce0;
+            --dark-gray: #5f6368;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0d2b45, #1d3557);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            height: 90vh;
+            background-color: var(--light);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Auth Screens */
+        .auth-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            padding: 40px;
+            background-color: var(--light);
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 450px;
+            background: var(--light);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-icon {
+            background: var(--primary);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 15px;
+        }
+
+        .logo-text {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .app-tagline {
+            color: var(--dark-gray);
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .security-badge {
+            background: var(--secondary);
+            border-radius: 20px;
+            padding: 8px 20px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 25px;
+            color: var(--success);
+        }
+
+        .security-badge i {
+            margin-right: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid var(--gray);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .password-container {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--dark-gray);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: var(--dark);
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-mfa {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-mfa:hover {
+            background: #e68a00;
+        }
+
+        .auth-footer {
+            margin-top: 25px;
+            color: var(--dark-gray);
+            font-size: 14px;
+        }
+
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 25px 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid var(--gray);
+        }
+
+        .divider span {
+            padding: 0 15px;
+            color: var(--dark-gray);
+            font-size: 14px;
+        }
+
+        /* MFA Setup */
+        .mfa-setup {
+            background: rgba(255, 152, 0, 0.1);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+            text-align: center;
+        }
+
+        .mfa-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--warning);
+        }
+
+        .qrcode-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            display: inline-block;
+            margin: 15px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .qrcode-placeholder {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(45deg, #ff9800 25%, #ffc107 25%, #ffc107 50%, #ff9800 50%, #ff9800 75%, #ffc107 75%);
+            background-size: 20px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .recovery-codes {
+            background: var(--secondary);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .recovery-codes h3 {
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .codes {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            font-family: monospace;
+            font-size: 16px;
+            color: var(--dark);
+        }
+
+        /* Main App */
+        .app-main {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+        }
+
+        .sidebar {
+            width: 100%;
+            background: var(--dark);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            height: 30%;
+        }
+
+        .user-info {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .user-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .user-status {
+            display: flex;
+            align-items: center;
+            color: var(--success);
+            font-size: 13px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .search-container {
+            padding: 10px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .search-box {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 8px 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            color: white;
+            width: 100%;
+            padding: 0 10px;
+        }
+
+        .search-box input::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .search-box input:focus {
+            border: none;
+            outline: none;
+        }
+
+        .conversations {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding: 10px;
+        }
+
+        .conversation {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-radius: 12px;
+            min-width: 100px;
+            margin-right: 10px;
+        }
+
+        .conversation:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .conversation.active {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .conversation-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #3498db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .conversation-info {
+            text-align: center;
+        }
+
+        .conversation-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .conversation-preview {
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 90px;
+        }
+
+        .conversation-time {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--secondary);
+            height: 70%;
+        }
+
+        .chat-header {
+            padding: 15px;
+            background: white;
+            border-bottom: 1px solid var(--gray);
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e74c3c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 16px;
+        }
+
+        .chat-info {
+            flex: 1;
+        }
+
+        .chat-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .chat-status {
+            font-size: 13px;
+            color: var(--success);
+        }
+
+        .chat-actions {
+            display: flex;
+        }
+
+        .chat-action {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 8px;
+            cursor: pointer;
+            color: var(--dark-gray);
+            transition: background 0.2s;
+        }
+
+        .chat-action:hover {
+            background: var(--secondary);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            max-width: 85%;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .message.sent {
+            margin-left: auto;
+        }
+
+        .message.received {
+            margin-right: auto;
+        }
+
+        .message-content {
+            padding: 12px;
+            border-radius: 18px;
+            position: relative;
+            word-wrap: break-word;
+            line-height: 1.4;
+            font-size: 15px;
+        }
+
+        .sent .message-content {
+            background: var(--primary);
+            color: white;
+            border-top-right-radius: 4px;
+        }
+
+        .received .message-content {
+            background: white;
+            color: var(--dark);
+            border-top-left-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .message-time {
+            font-size: 10px;
+            color: var(--dark-gray);
+            margin-top: 5px;
+            text-align: right;
+            opacity: 0.8;
+        }
+
+        .received .message-time {
+            text-align: left;
+        }
+
+        .message-status {
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .encryption-notice {
+            text-align: center;
+            padding: 12px;
+            background: rgba(26, 115, 232, 0.1);
+            border-radius: 8px;
+            margin: 15px 0;
+            color: var(--primary);
+            font-size: 13px;
+        }
+
+        .encryption-notice i {
+            margin-right: 5px;
+        }
+
+        .chat-input-container {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid var(--gray);
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            background: var(--secondary);
+            border-radius: 24px;
+            padding: 6px 12px;
+        }
+
+        .input-group input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 8px;
+            font-size: 15px;
+        }
+
+        .input-group input:focus {
+            border: none;
+            outline: none;
+        }
+
+        .input-action {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--dark-gray);
+            transition: background 0.2s;
+            font-size: 14px;
+        }
+
+        .input-action:hover {
+            background: rgba(0,0,0,0.05);
+        }
+
+        .send-button {
+            background: var(--primary);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 14px;
+        }
+
+        .send-button:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Security Features */
+        .security-features {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            width: 220px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 20px;
+        }
+
+        .feature-1 .feature-icon {
+            background: rgba(76, 175, 80, 0.1);
+            color: var(--success);
+        }
+
+        .feature-2 .feature-icon {
+            background: rgba(26, 115, 232, 0.1);
+            color: var(--primary);
+        }
+
+        .feature-3 .feature-icon {
+            background: rgba(244, 67, 54, 0.1);
+            color: var(--danger);
+        }
+
+        .feature-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .feature-description {
+            color: var(--dark-gray);
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .app-main {
+                flex-direction: row;
+            }
+            
+            .sidebar {
+                width: 320px;
+                height: 100%;
+            }
+            
+            .conversations {
+                flex-direction: column;
+                overflow-x: hidden;
+            }
+            
+            .conversation {
+                flex-direction: row;
+                min-width: auto;
+                padding: 15px 20px;
+                margin-right: 0;
+            }
+            
+            .conversation-avatar {
+                margin-right: 15px;
+                margin-bottom: 0;
+            }
+            
+            .conversation-info {
+                text-align: left;
+                flex: 1;
+            }
+            
+            .conversation-preview {
+                max-width: 200px;
+            }
+        }
+        
+        /* Message reply indicator */
+        .reply-indicator {
+            display: flex;
+            align-items: center;
+            background: rgba(0,0,0,0.03);
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .reply-indicator-text {
+            font-size: 13px;
+            color: var(--dark-gray);
+            flex: 1;
+        }
+        
+        .cancel-reply {
+            color: var(--danger);
+            cursor: pointer;
+            margin-left: 8px;
+        }
+
+        /* MFA Code Input */
+        .mfa-code-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .mfa-code-input {
+            width: 40px;
+            height: 50px;
+            margin: 0 5px;
+            text-align: center;
+            font-size: 20px;
+            border: 2px solid var(--gray);
+            border-radius: 8px;
+        }
+
+        .mfa-code-input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Authentication Screen -->
+        <div class="auth-container" id="authScreen">
+            <div class="auth-card">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="logo-text">SecureChat</div>
+                </div>
+                
+                <div class="app-tagline">End-to-end encrypted messaging with military-grade security</div>
+                
+                <div class="security-badge">
+                    <i class="fas fa-shield-alt"></i> MFA Protected & AES-256 Encrypted
+                </div>
+                
+                <div id="loginForm">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" placeholder="Enter your email" autocomplete="username">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="password-container">
+                            <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password">
+                            <span class="toggle-password" id="togglePassword">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" id="loginBtn">Sign In</button>
+                    
+                    <div class="divider">
+                        <span>OR</span>
+                    </div>
+                    
+                    <button class="btn btn-mfa" id="mfaLoginBtn">
+                        <i class="fas fa-mobile-alt"></i> Sign In with Authenticator App
+                    </button>
+                    
+                    <div class="auth-footer">
+                        Don't have an account? <a href="#" id="showRegister">Register</a><br>
+                        <a href="#">Forgot password?</a>
+                    </div>
+                </div>
+                
+                <div id="registerForm" style="display: none;">
+                    <div class="form-group">
+                        <label for="regName">Full Name</label>
+                        <input type="text" id="regName" placeholder="Enter your full name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="regEmail">Email</label>
+                        <input type="email" id="regEmail" placeholder="Enter your email" autocomplete="username">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="regPassword">Password</label>
+                        <div class="password-container">
+                            <input type="password" id="regPassword" placeholder="Create a strong password" autocomplete="new-password">
+                            <span class="toggle-password" id="toggleRegPassword">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="regPasswordConfirm">Confirm Password</label>
+                        <input type="password" id="regPasswordConfirm" placeholder="Confirm your password" autocomplete="new-password">
+                    </div>
+                    
+                    <button class="btn btn-primary" id="registerBtn">Create Account</button>
+                    
+                    <div class="auth-footer">
+                        Already have an account? <a href="#" id="showLogin">Sign In</a>
+                    </div>
+                </div>
+                
+                <div id="mfaSetup" style="display: none;">
+                    <div class="mfa-setup">
+                        <h2 class="mfa-title">Set Up Multi-Factor Authentication</h2>
+                        <p>Scan the QR code with your authenticator app</p>
+                        
+                        <div class="qrcode-container">
+                            <div class="qrcode-placeholder">MFA QR Code</div>
+                        </div>
+                        
+                        <p class="mfa-instructions">Or enter this code manually: <strong>JBSWY3DPEHPK3PXP</strong></p>
+                        
+                        <div class="form-group">
+                            <label for="mfaCode">Enter 6-digit verification code</label>
+                            <div class="mfa-code-container">
+                                <input type="text" class="mfa-code-input" maxlength="1" pattern="[0-9]">
+                                <input type="text" class="mfa-code-input" maxlength="1" pattern="[0-9]">
+                                <input type="text" class="mfa-code-input" maxlength="1" pattern="[0-9]">
+                                <input type="text" class="mfa-code-input" maxlength="1" pattern="[0-9]">
+                                <input type="text" class="mfa-code-input" maxlength="1" pattern="[0-9]">
+                                <input type="text" class="mfa-code-input" maxlength="1" pattern="[0-9]">
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-mfa" id="verifyMfaBtn">Verify & Activate MFA</button>
+                        
+                        <div class="recovery-codes">
+                            <h3>Recovery Codes</h3>
+                            <p>Save these codes in a secure place. Each code can be used only once.</p>
+                            <div class="codes">
+                                <div>8XK4-9FJ2</div>
+                                <div>3PQ7-RT92</div>
+                                <div>B4N8-KL3M</div>
+                                <div>6ZV2-X9P1</div>
+                                <div>7WQ5-D8R3</div>
+                                <div>1SD4-F6G7</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main App Screen -->
+        <div class="app-main" id="appMain">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="user-info">
+                    <div class="user-avatar">JS</div>
+                    <div>
+                        <div class="user-name">John Smith</div>
+                        <div class="user-status">
+                            <div class="status-indicator"></div>
+                            <span>Online • Secure</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="search-container">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search conversations">
+                    </div>
+                </div>
+                
+                <div class="conversations">
+                    <div class="conversation active" data-chat="es">
+                        <div class="conversation-avatar">ES</div>
+                        <div class="conversation-info">
+                            <div class="conversation-name">Emma Stone</div>
+                            <div class="conversation-preview">Hardware MFA for critical systems</div>
+                            <div class="conversation-time">Now</div>
+                        </div>
+                    </div>
+                    
+                    <div class="conversation" data-chat="mj">
+                        <div class="conversation-avatar">MJ</div>
+                        <div class="conversation-info">
+                            <div class="conversation-name">Mike Johnson</div>
+                            <div class="conversation-preview">Key rotation completed</div>
+                            <div class="conversation-time">10 min ago</div>
+                        </div>
+                    </div>
+                    
+                    <div class="conversation" data-chat="st">
+                        <div class="conversation-avatar">ST</div>
+                        <div class="conversation-info">
+                            <div class="conversation-name">Security Team</div>
+                            <div class="conversation-preview">New security advisory</div>
+                            <div class="conversation-time">1 hr ago</div>
+                        </div>
+                    </div>
+                    
+                    <div class="conversation" data-chat="ar">
+                        <div class="conversation-avatar">AR</div>
+                        <div class="conversation-info">
+                            <div class="conversation-name">Alex Rivera</div>
+                            <div class="conversation-preview">Pentest scheduled</div>
+                            <div class="conversation-time">Yesterday</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chat Area -->
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div class="chat-avatar">ES</div>
+                    <div class="chat-info">
+                        <div class="chat-name">Emma Stone</div>
+                        <div class="chat-status">
+                            <i class="fas fa-circle"></i> Online • End-to-end encrypted
+                        </div>
+                    </div>
+                    <div class="chat-actions">
+                        <div class="chat-action">
+                            <i class="fas fa-phone-alt"></i>
+                        </div>
+                        <div class="chat-action">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <div class="chat-action">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <div class="encryption-notice">
+                        <i class="fas fa-lock"></i> Messages are end-to-end encrypted. No one outside this chat can read them.
+                    </div>
+                    
+                    <div class="message received" data-msg-id="1">
+                        <div class="message-content">
+                            Hi John, did you get a chance to review the new security protocols?
+                            <div class="message-time">10:15 AM</div>
+                        </div>
+                    </div>
+                    
+                    <div class="message sent" data-msg-id="2">
+                        <div class="message-content">
+                            Yes, I've gone through them. The MFA implementation looks solid. 
+                            <div class="message-time">10:18 AM</div>
+                            <div class="message-status"><i class="fas fa-check-double"></i></div>
+                        </div>
+                    </div>
+                    
+                    <div class="message received" data-msg-id="3">
+                        <div class="message-content">
+                            Great! I've also rotated the encryption keys and updated the backup systems. We should schedule a security audit next week.
+                            <div class="message-time">10:20 AM</div>
+                        </div>
+                    </div>
+                    
+                    <div class="message sent" data-msg-id="4">
+                        <div class="message-content">
+                            Agreed. I'll set up a meeting. Also, I've enabled biometric authentication for all admin accounts as an additional factor.
+                            <div class="message-time">10:24 AM</div>
+                            <div class="message-status"><i class="fas fa-check-double"></i></div>
+                        </div>
+                    </div>
+                    
+                    <div class="message received" data-msg-id="5">
+                        <div class="message-content">
+                            Perfect. That adds an extra layer of security. Let's also consider implementing hardware security keys for critical systems.
+                            <div class="message-time">10:25 AM</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-input-container">
+                    <div class="reply-indicator" id="replyIndicator" style="display: none;">
+                        <div class="reply-indicator-text">Replying to: <span id="replyToText"></span></div>
+                        <div class="cancel-reply" id="cancelReply"><i class="fas fa-times"></i></div>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-action">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <input type="text" id="messageInput" placeholder="Type a secure message...">
+                        <div class="input-action">
+                            <i class="fas fa-paperclip"></i>
+                        </div>
+                        <div class="input-action">
+                            <i class="fas fa-microphone"></i>
+                        </div>
+                        <div class="send-button" id="sendBtn">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const authScreen = document.getElementById('authScreen');
+        const appMain = document.getElementById('appMain');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const mfaSetup = document.getElementById('mfaSetup');
+        const showRegister = document.getElementById('showRegister');
+        const showLogin = document.getElementById('showLogin');
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const mfaLoginBtn = document.getElementById('mfaLoginBtn');
+        const verifyMfaBtn = document.getElementById('verifyMfaBtn');
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const toggleRegPassword = document.getElementById('toggleRegPassword');
+        const regPasswordInput = document.getElementById('regPassword');
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const conversations = document.querySelectorAll('.conversation');
+        const replyIndicator = document.getElementById('replyIndicator');
+        const replyToText = document.getElementById('replyToText');
+        const cancelReply = document.getElementById('cancelReply');
+        const mfaCodeInputs = document.querySelectorAll('.mfa-code-input');
+        
+        // State variables
+        let replyingTo = null;
+        let currentChat = 'es';
+        
+        // Event Listeners
+        showRegister.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'block';
+            mfaSetup.style.display = 'none';
+        });
+        
+        showLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            registerForm.style.display = 'none';
+            loginForm.style.display = 'block';
+            mfaSetup.style.display = 'none';
+        });
+        
+        loginBtn.addEventListener('click', () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (email && password) {
+                showMfaSetup();
+            } else {
+                alert('Please enter your credentials');
+            }
+        });
+        
+        registerBtn.addEventListener('click', () => {
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regPasswordConfirm').value;
+            
+            if (name && email && password && password === confirmPassword) {
+                showMfaSetup();
+            } else if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+            }
+        });
+        
+        mfaLoginBtn.addEventListener('click', () => {
+            alert('Redirecting to authenticator app verification...');
+        });
+        
+        verifyMfaBtn.addEventListener('click', () => {
+            const mfaCode = Array.from(mfaCodeInputs).map(input => input.value).join('');
+            if (mfaCode.length === 6) {
+                activateApp();
+            } else {
+                alert('Please enter a valid 6-digit code');
+            }
+        });
+        
+        togglePassword.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            togglePassword.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+        });
+        
+        toggleRegPassword.addEventListener('click', () => {
+            const type = regPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            regPasswordInput.setAttribute('type', type);
+            toggleRegPassword.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+        });
+        
+        // MFA code input handling
+        mfaCodeInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value.length === 1) {
+                    if (index < mfaCodeInputs.length - 1) {
+                        mfaCodeInputs[index + 1].focus();
+                    }
+                }
+            });
+            
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && e.target.value.length === 0) {
+                    if (index > 0) {
+                        mfaCodeInputs[index - 1].focus();
+                    }
+                }
+            });
+        });
+        
+        // Send message handler
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // Conversation switching
+        conversations.forEach(conversation => {
+            conversation.addEventListener('click', () => {
+                // Remove active class from all conversations
+                conversations.forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked conversation
+                conversation.classList.add('active');
+                
+                // Update current chat
+                currentChat = conversation.dataset.chat;
+                
+                // Update chat header
+                const name = conversation.querySelector('.conversation-name').textContent;
+                const initials = conversation.querySelector('.conversation-avatar').textContent;
+                updateChatHeader(name, initials);
+                
+                // Clear any reply indicator
+                cancelReplyHandler();
+            });
+        });
+        
+        // Reply functionality
+        chatMessages.addEventListener('click', (e) => {
+            const message = e.target.closest('.message');
+            if (message && message.classList.contains('received')) {
+                // Get message text
+                const msgContent = message.querySelector('.message-content').firstChild.textContent.trim();
+                const truncatedMsg = msgContent.length > 30 ? msgContent.substring(0, 30) + '...' : msgContent;
+                
+                // Set reply state
+                replyingTo = message.dataset.msgId;
+                replyToText.textContent = truncatedMsg;
+                replyIndicator.style.display = 'flex';
+                
+                // Focus input
+                messageInput.focus();
+            }
+        });
+        
+        // Cancel reply handler
+        cancelReply.addEventListener('click', cancelReplyHandler);
+        
+        // Functions
+        function showMfaSetup() {
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'none';
+            mfaSetup.style.display = 'block';
+            
+            // Clear any existing codes
+            mfaCodeInputs.forEach(input => input.value = '');
+            mfaCodeInputs[0].focus();
+        }
+        
+        function activateApp() {
+            authScreen.style.display = 'none';
+            appMain.style.display = 'flex';
+            
+            // Show welcome message in chat
+            setTimeout(() => {
+                const welcomeMsg = document.createElement('div');
+                welcomeMsg.className = 'message received';
+                welcomeMsg.innerHTML = `
+                    <div class="message-content">
+                        Welcome to SecureChat! Your account is now protected with MFA. 
+                        All messages are end-to-end encrypted.
+                        <div class="message-time">Just now</div>
+                    </div>
+                `;
+                chatMessages.appendChild(welcomeMsg);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 1000);
+        }
+        
+        function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text) return;
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            // Create message element
+            const messageEl = document.createElement('div');
+            messageEl.className = 'message sent';
+            
+            // Add reply context if replying
+            let replyContext = '';
+            if (replyingTo) {
+                const originalMsg = document.querySelector(`.message[data-msg-id="${replyingTo}"] .message-content`);
+                const originalText = originalMsg.firstChild.textContent.trim();
+                const truncatedOriginal = originalText.length > 30 ? originalText.substring(0, 30) + '...' : originalText;
+                
+                replyContext = `<div class="reply-context" style="font-size:13px; opacity:0.8; border-left:2px solid var(--primary); padding-left:8px; margin-bottom:5px;">
+                    Replying to: "${truncatedOriginal}"
+                </div>`;
+            }
+            
+            messageEl.innerHTML = `
+                <div class="message-content">
+                    ${replyContext}
+                    ${text}
+                    <div class="message-time">${timeString}</div>
+                    <div class="message-status"><i class="fas fa-check"></i></div>
+                </div>
+            `;
+            
+            // Add to chat
+            chatMessages.appendChild(messageEl);
+            
+            // Clear input and reset reply state
+            messageInput.value = '';
+            cancelReplyHandler();
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Simulate reply after delay
+            setTimeout(simulateReply, 2000);
+        }
+        
+        function simulateReply() {
+            const messages = {
+                'es': [
+                    "That sounds like a solid plan. I'll order the YubiKeys for the team.",
+                    "Have you considered using passkeys as well? They're gaining popularity.",
+                    "I've scheduled the audit for next Tuesday at 2 PM. Does that work?",
+                    "Let's also implement session timeouts for inactive users.",
+                    "I'll create a security checklist for the new hardware deployment."
+                ],
+                'mj': [
+                    "The backup keys have been rotated as well.",
+                    "We should document the key rotation process for future reference.",
+                    "I've updated the key management policy document.",
+                    "The new keys are stored in the hardware security module.",
+                    "Key rotation logs have been archived."
+                ],
+                'st': [
+                    "All systems have been patched against CVE-2023-12345.",
+                    "Reminder: Security training is scheduled for tomorrow.",
+                    "The vulnerability scan detected 3 medium severity issues.",
+                    "New security policy updates have been published.",
+                    "Quarterly security review is coming up next month."
+                ],
+                'ar': [
+                    "The pentest team will need VPN access to our staging environment.",
+                    "Please provide the test credentials by end of day.",
+                    "The pentest scope document has been updated.",
+                    "We should schedule a debrief meeting after the test.",
+                    "The testing window has been approved for 48 hours."
+                ]
+            };
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const chatMessagesArray = messages[currentChat] || messages['es'];
+            const randomMsg = chatMessagesArray[Math.floor(Math.random() * chatMessagesArray.length)];
+            
+            const replyEl = document.createElement('div');
+            replyEl.className = 'message received';
+            replyEl.innerHTML = `
+                <div class="message-content">
+                    ${randomMsg}
+                    <div class="message-time">${timeString}</div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(replyEl);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Update conversation preview
+            const activeConvo = document.querySelector(`.conversation[data-chat="${currentChat}"]`);
+            if (activeConvo) {
+                const preview = activeConvo.querySelector('.conversation-preview');
+                if (preview) {
+                    preview.textContent = randomMsg.length > 30 ? randomMsg.substring(0, 30) + '...' : randomMsg;
+                }
+                const time = activeConvo.querySelector('.conversation-time');
+                if (time) {
+                    time.textContent = 'Now';
+                }
+            }
+        }
+        
+        function cancelReplyHandler() {
+            replyingTo = null;
+            replyIndicator.style.display = 'none';
+        }
+        
+        function updateChatHeader(name, initials) {
+            document.querySelector('.chat-name').textContent = name;
+            document.querySelector('.chat-avatar').textContent = initials;
+            
+            // Clear chat messages
+            chatMessages.innerHTML = `
+                <div class="encryption-notice">
+                    <i class="fas fa-lock"></i> Messages are end-to-end encrypted. No one outside this chat can read them.
+                </div>
+            `;
+            
+            // Add conversation-specific messages
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            // Different messages for different contacts
+            let initialMessages = [];
+            
+            switch(currentChat) {
+                case 'mj':
+                    initialMessages = [
+                        {sender: 'received', text: "Hey John, just confirming that the key rotation process is complete."},
+                        {sender: 'sent', text: "Great news! I'll update the documentation accordingly."},
+                        {sender: 'received', text: "We should also rotate the backup encryption keys next week."}
+                    ];
+                    break;
+                case 'st':
+                    initialMessages = [
+                        {sender: 'received', text: "Security Advisory: Critical vulnerability found in OpenSSL (CVE-2023-12345)"},
+                        {sender: 'sent', text: "Thanks for the heads up. We're patching all systems now."},
+                        {sender: 'received', text: "Reminder: All systems must be patched by EOD tomorrow."}
+                    ];
+                    break;
+                case 'ar':
+                    initialMessages = [
+                        {sender: 'received', text: "The penetration test is scheduled for next Wednesday."},
+                        {sender: 'sent', text: "Got it. I'll prepare the staging environment."},
+                        {sender: 'received', text: "Please ensure all test credentials are properly isolated."}
+                    ];
+                    break;
+                default: // es
+                    initialMessages = [
+                        {sender: 'received', text: "Hi John, did you get a chance to review the new security protocols?"},
+                        {sender: 'sent', text: "Yes, I've gone through them. The MFA implementation looks solid."},
+                        {sender: 'received', text: "Great! Let's also consider hardware security keys for critical systems."}
+                    ];
+            }
+            
+            // Add messages to chat
+            initialMessages.forEach((msg, index) => {
+                const messageEl = document.createElement('div');
+                messageEl.className = `message ${msg.sender}`;
+                messageEl.dataset.msgId = index + 1;
+                messageEl.innerHTML = `
+                    <div class="message-content">
+                        ${msg.text}
+                        <div class="message-time">${timeString}</div>
+                        ${msg.sender === 'sent' ? '<div class="message-status"><i class="fas fa-check-double"></i></div>' : ''}
+                    </div>
+                `;
+                chatMessages.appendChild(messageEl);
+            });
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    </script>
+</body>
+</html>
+Images:
